@@ -1,582 +1,545 @@
-Number Theory and Cryptography Workshop – Assignment
-Name: MD Sahed
+Number Theory and Cryptography Workshop
+Name: Md.Sahed
 Student ID: IT23036
-Course/Topic: Number Theory and Cryptography
 
- Topics Covered
-Section	Topic	Practical work
-Number Theory	Divisibility and primes	Divisibility test, prime checker
-Number Theory	GCD and Euclidean Algorithm	GCD implementation
-Number Theory	Extended Euclidean Algorithm	Bézout coefficients
-Number Theory	Modular arithmetic	Addition, subtraction, multiplication, power
-Number Theory	Modular inverse	Inverse calculator
-Number Theory	Fermat's Little Theorem	Theorem verification
-Number Theory	Euler's totient function	Calculate φ(n)
-Number Theory	Chinese Remainder Theorem	Solve simultaneous congruences
-Cryptography	Caesar cipher	Encrypt and decrypt
-Cryptography	Affine cipher	Encrypt and decrypt
-Cryptography	Diffie–Hellman	Shared secret generation
-Cryptography	RSA	Key generation, encryption, decryption
-Security	Hashing and safe practice	SHA-256 demonstration and limitations
+Abstract
+This repository presents a practical study of fundamental number theory and its applications to cryptography. Mathematical concepts are explained with equations and implemented using Python. The experiments include Euclidean algorithms, modular arithmetic, modular inverses, fast modular exponentiation, the Chinese Remainder Theorem, the One-Time Pad, RSA, Diffie–Hellman key exchange, and selected demonstrations of RSA weaknesses.
+Learning note: The small numerical keys used in demonstrations are for education only. They are not secure for real-world communication.
 
+Open the notebook in Google Colab
+After uploading this repository to GitHub, replace YOUR_GITHUB_USERNAME below with your GitHub username and keep the repository name and notebook path unchanged:
 
-2. Setup and Requirements
-The assignment can be completed in Google Colab or Jupyter Notebook. The examples use Python's standard library; no external package is required for the core algorithms.
-Google Colab
-1. Open Google Colab.
-2. Select New Notebook.
-3. Copy each code cell from this README into a separate code cell.
-4. Run the cells from top to bottom.
-5. Save the notebook as Number_Theory_Cryptography_IT23036.ipynb.
-Jupyter Notebook
-Install and start Jupyter:
-pip install notebook
+You can also open the notebook directly in Google Colab and upload the .ipynb file from your computer. The badge link becomes fully functional after the notebook is pushed to the GitHub repository.
+Table of Contents
+1. Introduction
+2. Environment Setup
+3. Number Theory Foundations
+4. Euclidean and Extended Euclidean Algorithms
+5. Linear Diophantine Equations
+6. Modular Arithmetic and Modular Inverse
+7. Fast Modular Exponentiation
+8. Chinese Remainder Theorem
+9. Cryptography Fundamentals
+10. One-Time Pad and Many-Time Pad
+11. RSA Cryptosystem
+12. RSA Weakness Demonstrations
+13. Diffie–Hellman Key Exchange
+14. Shor's Algorithm: Mathematical Idea
+15. Experiments and Results
+16. Conclusion
+17. References
+1. Introduction
+Number theory is the branch of mathematics concerned with integers and their properties. It provides the mathematical foundation for many cryptographic systems. Cryptography protects information by transforming readable data into a form that unauthorized users cannot understand.
+Objectives
+- Understand divisibility, prime numbers, GCD and LCM.
+- Implement the Euclidean and Extended Euclidean algorithms.
+- Solve linear Diophantine equations.
+- Perform modular arithmetic and calculate modular inverses.
+- Implement fast modular exponentiation and the Chinese Remainder Theorem.
+- Demonstrate symmetric and public-key cryptography.
+- Understand RSA encryption, decryption and selected weaknesses.
+- Demonstrate Diffie–Hellman key exchange.
+- Practice mathematical algorithms using Python and Jupyter Notebook.
+2. Environment Setup
+Requirements
+- Python 3.9 or later
+- Jupyter Notebook or JupyterLab, or Google Colab
+- NumPy and Matplotlib (optional, for numerical experiments and figures)
+Install locally:
+python -m pip install notebook jupyterlab numpy matplotlib
+Start Jupyter:
 jupyter notebook
-Optional packages for plotting:
-pip install matplotlib numpy
-Part A: Number Theory
-3. Divisibility and Prime Numbers
-An integer a divides an integer b if there is an integer k such that:
+Alternatively, upload number_theory_cryptography_practice.ipynb to Google Colab and execute the cells from top to bottom.
+
+No external package is required for the core algorithms in this repository.
+3. Number Theory Foundations
+3.1 Divisibility
+For integers \(a\) and \(b\), where \(a \ne 0\), we say that \(a\) divides \(b\) if there exists an integer \(k\) such that
 \[
-b = ak
+b=ak.
 \]
-A prime number is an integer greater than 1 whose only positive divisors are 1 and itself. Examples: 2, 3, 5, 7, 11.
-3.1 Python: Divisibility Test
-def is_divisible(a, b):
-    if a == 0:
-        raise ValueError("The divisor cannot be zero.")
-    return b % a == 0
+Notation: \(a\mid b\).
 
-print(is_divisible(3, 15))  # True
-print(is_divisible(4, 15))  # False
-Explanation: The modulo operator % returns the remainder. If b % a == 0, then a divides b.
-3.2 Python: Prime Number Test
-def is_prime(n):
-    if n <= 1:
-        return False
-    if n <= 3:
-        return True
-    if n % 2 == 0 or n % 3 == 0:
-        return False
+Example: \(4\mid 20\), because \(20=4\times5\).
+3.2 Prime and Composite Numbers
+A prime number is an integer greater than 1 whose only positive divisors are 1 and itself. A composite number has more than two positive divisors.
 
-    i = 5
-    while i * i <= n:
-        if n % i == 0 or n % (i + 2) == 0:
-            return False
-        i += 6
-    return True
-
-for number in [1, 2, 7, 15, 29, 35]:
-    print(number, "is prime:", is_prime(number))
-Expected observation: 2, 7, and 29 are prime; 1, 15, and 35 are not prime.
-
-Time complexity: \(O(\sqrt n)\), because possible divisors only need to be checked up to the square root of n.
-4. Greatest Common Divisor (GCD)
-The greatest common divisor of two integers is the largest positive integer that divides both numbers.
-
-For example:
+Examples: 2, 3, 5, 7 and 11 are prime; 4, 6, 8 and 9 are composite.
+3.3 Greatest Common Divisor
+The greatest common divisor, or GCD, of two integers is the largest positive integer that divides both.
 \[
-\gcd(48,18)=6
+\gcd(24,36)=12.
 \]
+3.4 Least Common Multiple
+The least common multiple, or LCM, is the smallest positive integer divisible by both inputs.
+\[
+\operatorname{lcm}(a,b)=\frac{|ab|}{\gcd(a,b)}
+\]
+for nonzero integers \(a,b\).
+4. Euclidean and Extended Euclidean Algorithms
 4.1 Euclidean Algorithm
-The Euclidean Algorithm repeatedly applies:
+The Euclidean algorithm repeatedly applies the division relation:
 \[
-\gcd(a,b)=\gcd(b,a\bmod b)
+a=bq+r,\quad 0\le r<b.
 \]
-until the remainder becomes zero.
-def gcd(a, b):
+Then
+\[
+\gcd(a,b)=\gcd(b,a\bmod b).
+\]
+The process stops when the remainder becomes zero.
+def gcd_euclidean(a, b):
     a, b = abs(a), abs(b)
-    while b != 0:
+    while b:
         a, b = b, a % b
     return a
 
-print("GCD(48, 18) =", gcd(48, 18))
-print("GCD(101, 10) =", gcd(101, 10))
-Expected output:
-GCD(48, 18) = 6
-GCD(101, 10) = 1
-When \(\gcd(a,b)=1\), the two integers are called relatively prime or coprime.
-5. Extended Euclidean Algorithm
-The Extended Euclidean Algorithm finds integers \(x\) and \(y\) such that:
+print(gcd_euclidean(48, 18))  # 6
+4.2 Extended Euclidean Algorithm
+The Extended Euclidean Algorithm finds integers \(x,y\) satisfying Bézout's identity:
 \[
-ax+by=\gcd(a,b)
+ax+by=\gcd(a,b).
 \]
-These values are called Bézout coefficients.
 def extended_gcd(a, b):
     if b == 0:
-        return abs(a), 1 if a >= 0 else -1, 0
-
-    g, x1, y1 = extended_gcd(b, a % b)
+        return (a, 1, 0)
+    d, x1, y1 = extended_gcd(b, a % b)
     x = y1
     y = x1 - (a // b) * y1
-    return g, x, y
+    return (d, x, y)
 
-g, x, y = extended_gcd(30, 18)
-print("GCD:", g)
-print("x:", x, "y:", y)
-print("Verification:", 30*x + 18*y)
-Explanation: The final verification should equal the GCD. This algorithm is especially important for finding modular inverses.
-6. Modular Arithmetic
-Modular arithmetic works with remainders. The expression
+d, x, y = extended_gcd(27, 15)
+print("GCD:", d)
+print("Coefficients:", x, y)
+print("Verification:", 27*x + 15*y)
+Application: The Extended Euclidean Algorithm is used to calculate modular inverses, which are essential in RSA key generation.
+5. Linear Diophantine Equations
+A linear Diophantine equation has the form
 \[
-a \equiv b \pmod m
+ax+by=c,
 \]
-means that a and b have the same remainder when divided by m, or equivalently that \(m\mid(a-b)\).
+where \(a,b,c,x,y\) are integers.
 
-Example:
+A solution exists if and only if
 \[
-17 \equiv 5 \pmod {12}
+\gcd(a,b)\mid c.
 \]
-6.1 Basic Operations
-a, b, m = 17, 5, 12
-
-print("Addition:", (a + b) % m)
-print("Subtraction:", (a - b) % m)
-print("Multiplication:", (a * b) % m)
-print("Power:", pow(a, 3, m))
-Python's pow(a, b, m) efficiently calculates \(a^b \bmod m\).
-6.2 Modular Exponentiation
-For large exponents, modular exponentiation avoids calculating the full power first.
+If Extended Euclid gives \(ax_0+by_0=d\), then for \(d\mid c\), one solution is
 \[
-a^b \bmod m
+x=x_0(c/d),\qquad y=y_0(c/d).
 \]
-base = 7
-exponent = 128
-modulus = 13
-
-result = pow(base, exponent, modulus)
-print(f"{base}^{exponent} mod {modulus} =", result)
-7. Modular Inverse
-The modular inverse of a modulo m is an integer x satisfying:
-\[
-ax \equiv 1 \pmod m
-\]
-An inverse exists if and only if:
-\[
-\gcd(a,m)=1
-\]
-def modular_inverse(a, m):
-    g, x, _ = extended_gcd(a, m)
-    if g != 1:
+def solve_diophantine(a, b, c):
+    d, x, y = extended_gcd(a, b)
+    if c % d != 0:
         return None
-    return x % m
+    factor = c // d
+    return x * factor, y * factor
 
-print("Inverse of 3 mod 11:", modular_inverse(3, 11))
-print("Verification:", (3 * modular_inverse(3, 11)) % 11)
-print("Inverse of 6 mod 9:", modular_inverse(6, 9))
-Expected observation: The inverse of 3 modulo 11 is 4 because \(3\times4=12\equiv1\pmod{11}\). No inverse exists for 6 modulo 9 because their GCD is 3, not 1.
-8. Fermat's Little Theorem
-If p is prime and p does not divide a, then:
+solution = solve_diophantine(15, 25, 5)
+print(solution)
+if solution:
+    x, y = solution
+    print("Verification:", 15*x + 25*y)
+6. Modular Arithmetic and Modular Inverse
+6.1 Modular Arithmetic
+The expression
 \[
-a^{p-1}\equiv1\pmod p
+a\equiv b\pmod n
 \]
-An equivalent form is:
-\[
-a^p\equiv a\pmod p
-\]
-Python Verification
-a = 3
-p = 7
-
-print("a^(p-1) mod p =", pow(a, p - 1, p))
-print("Expected value = 1")
-Explanation: Since 7 is prime and 7 does not divide 3, the result must be 1.
-
-Application: Fermat's Little Theorem is useful in modular arithmetic and some primality-testing methods. It is not, by itself, a proof that an arbitrary number is prime.
-9. Euler's Totient Function
-Euler's totient function \(\phi(n)\) counts the positive integers from 1 to n that are relatively prime to n.
-
-For a prime number \(p\):
-\[
-\phi(p)=p-1
-\]
-For two distinct primes \(p\) and \(q\):
-\[
-\phi(pq)=(p-1)(q-1)
-\]
-Python Implementation
-def euler_totient(n):
-    if n < 1:
-        raise ValueError("n must be a positive integer")
-
-    count = 0
-    for k in range(1, n + 1):
-        if gcd(k, n) == 1:
-            count += 1
-    return count
-
-for n in [1, 5, 8, 9, 10, 12]:
-    print(f"phi({n}) =", euler_totient(n))
-Expected observation: \(\phi(9)=6\), because 1, 2, 4, 5, 7, and 8 are coprime to 9.
-10. Euler's Theorem
-If a and n are coprime, then:
-\[
-a^{\phi(n)}\equiv1\pmod n
-\]
-Python Verification
-a = 3
-n = 10
-phi_n = euler_totient(n)
-
-print("phi(n) =", phi_n)
-print("a^phi(n) mod n =", pow(a, phi_n, n))
-Explanation: Here, \(\gcd(3,10)=1\) and \(\phi(10)=4\), so \(3^4\equiv1\pmod{10}\).
-11. Chinese Remainder Theorem (CRT)
-The Chinese Remainder Theorem states that a system of congruences has a unique solution modulo the product of the moduli when the moduli are pairwise coprime.
+means that \(n\) divides \(a-b\).
 
 Example:
 \[
-x\equiv2\pmod3
+17\equiv5\pmod{12}.
 \]
+6.2 Multiplicative Inverse
+The multiplicative inverse of \(a\) modulo \(n\) is an integer \(a^{-1}\) satisfying
 \[
-x\equiv3\pmod5
+aa^{-1}\equiv1\pmod n.
 \]
+It exists if and only if
 \[
-x\equiv2\pmod7
+\gcd(a,n)=1.
 \]
-The solution is \(x=23\pmod{105}\).
-Python Implementation
-def chinese_remainder(remainders, moduli):
-    if len(remainders) != len(moduli):
-        raise ValueError("Lists must have equal length")
+def mod_inverse(a, n):
+    d, x, _ = extended_gcd(a, n)
+    if d != 1:
+        raise ValueError("Modular inverse does not exist.")
+    return x % n
 
-    # This implementation assumes pairwise coprime moduli.
-    for i in range(len(moduli)):
-        for j in range(i + 1, len(moduli)):
-            if gcd(moduli[i], moduli[j]) != 1:
-                raise ValueError("Moduli must be pairwise coprime")
-
-    product = 1
-    for m in moduli:
-        product *= m
-
-    result = 0
-    for r, m in zip(remainders, moduli):
-        partial = product // m
-        inverse = modular_inverse(partial, m)
-        result += r * partial * inverse
-
-    return result % product
-
-r = [2, 3, 2]
-m = [3, 5, 7]
-
-x = chinese_remainder(r, m)
-print("CRT solution:", x)
-print("Verification:", [x % mod for mod in m])
-Expected output:
-CRT solution: 23
-Verification: [2, 3, 2]
-Part B: Cryptography
-12. Introduction to Cryptography
-Cryptography is the science of securing information through mathematical methods.
-
-Important terms:
-- Plaintext: Original readable message.
-- Ciphertext: Encrypted, unreadable message.
-- Encryption: Converting plaintext into ciphertext.
-- Decryption: Recovering plaintext from ciphertext.
-- Key: A value used by an algorithm to encrypt or decrypt data.
-A basic encryption model is:
+print(mod_inverse(7, 26))  # 15
+print((7 * mod_inverse(7, 26)) % 26)  # 1
+6.3 Modular Division
+To calculate \(b/a\pmod n\), multiply \(b\) by the modular inverse of \(a\):
 \[
-C=E_K(P)
+b/a\equiv b\cdot a^{-1}\pmod n.
 \]
-\[
-P=D_K(C)
-\]
-where P is plaintext, C is ciphertext, E is encryption, D is decryption, and K is the key.
-Types of Cryptography
-1. Symmetric-key cryptography: The same secret key is used for encryption and decryption.
-2. Asymmetric-key cryptography: A public key and a private key are used.
-3. Hash functions: Produce a fixed-length digest; hashing is not encryption and cannot normally be reversed.
-13. Caesar Cipher
-The Caesar cipher is a substitution cipher in which each letter is shifted by a fixed number.
+def modular_division(b, a, n):
+    return (b * mod_inverse(a, n)) % n
 
-Encryption:
+print(modular_division(9, 5, 13))
+7. Fast Modular Exponentiation
+Directly calculating \(a^e\) can create an extremely large integer. Repeated squaring calculates the modular result efficiently.
 \[
-E(x)=(x+k)\bmod26
+a^e\bmod n
 \]
-Decryption:
-\[
-D(x)=(x-k)\bmod26
-\]
-Here, k is the shift key.
-Python Implementation
-def caesar_encrypt(message, shift):
-    result = ""
-    for char in message:
-        if char.isalpha():
-            base = ord('A') if char.isupper() else ord('a')
-            result += chr((ord(char) - base + shift) % 26 + base)
-        else:
-            result += char
+The algorithm uses approximately \(O(\log e)\) modular multiplications.
+def fast_mod_exp(base, exponent, modulus):
+    if modulus <= 0 or exponent < 0:
+        raise ValueError("Use a positive modulus and non-negative exponent.")
+    result = 1 % modulus
+    base %= modulus
+
+    while exponent > 0:
+        if exponent & 1:
+            result = (result * base) % modulus
+        base = (base * base) % modulus
+        exponent >>= 1
+
     return result
 
-def caesar_decrypt(ciphertext, shift):
-    return caesar_encrypt(ciphertext, -shift)
-
-message = "HELLO WORLD"
-key = 3
-
-encrypted = caesar_encrypt(message, key)
-decrypted = caesar_decrypt(encrypted, key)
-
-print("Original:", message)
-print("Encrypted:", encrypted)
-print("Decrypted:", decrypted)
-Expected output:
-Original: HELLO WORLD
-Encrypted: KHOOR ZRUOG
-Decrypted: HELLO WORLD
-Limitation: Caesar cipher is insecure because there are only 26 possible shifts and it is vulnerable to brute-force attacks.
-14. Affine Cipher
-The Affine cipher is another substitution cipher based on modular arithmetic.
-
-Encryption:
+print(fast_mod_exp(4, 5, 3))  # 1
+print(fast_mod_exp(7, 128, 13))
+8. Chinese Remainder Theorem
+The Chinese Remainder Theorem (CRT) states that if \(n_1,n_2\) are coprime, then the system
 \[
-E(x)=(ax+b)\bmod26
+x\equiv r_1\pmod{n_1}
+\]
+\[
+x\equiv r_2\pmod{n_2}
+\]
+has a unique solution modulo \(n_1n_2\).
+
+Using Extended Euclid, find \(u,v\) such that
+\[
+n_1u+n_2v=1.
+\]
+Then one solution is
+\[
+x=(r_1n_2v+r_2n_1u)\bmod(n_1n_2).
+\]
+def chinese_remainder(n1, r1, n2, r2):
+    d, u, v = extended_gcd(n1, n2)
+    if d != 1:
+        raise ValueError("The moduli must be coprime.")
+    return (r1*n2*v + r2*n1*u) % (n1*n2)
+
+x = chinese_remainder(13, 7, 6, 5)
+print(x)  # 59
+print(x % 13, x % 6)  # 7 5
+9. Cryptography Fundamentals
+Cryptography is the science of protecting information using mathematical techniques.
+Term	Meaning
+Plaintext	Original readable message
+Ciphertext	Encrypted message
+Encryption	Converting plaintext into ciphertext
+Decryption	Recovering plaintext from ciphertext
+Key	Secret or public information used by an algorithm
+Symmetric cryptography	Same secret key is used for encryption and decryption
+Asymmetric cryptography	Public and private keys are used
+
+
+Two broad categories are:
+1. Symmetric-key cryptography: One shared secret key is used by both parties.
+2. Public-key cryptography: A public key can be shared, while the private key must remain secret.
+10. One-Time Pad and Many-Time Pad
+10.1 XOR Operation
+XOR (exclusive OR) operates on bits:
+A	B	A XOR B
+0	0	0
+0	1	1
+1	0	1
+1	1	0
+
+
+For a plaintext \(P\) and key \(K\):
+\[
+C=P\oplus K
 \]
 Decryption:
 \[
-D(x)=a^{-1}(x-b)\bmod26
+P=C\oplus K.
 \]
-The key a must be coprime to 26 so that its modular inverse exists. The value b can be any integer from 0 to 25.
-Python Implementation
-def affine_encrypt(text, a, b):
-    if gcd(a, 26) != 1:
-        raise ValueError("a must be coprime to 26")
+A correctly implemented One-Time Pad is information-theoretically secure when the key is truly random, at least as long as the message, kept secret, and used only once.
+def otp_encrypt(message, key):
+    p = message.encode("utf-8")
+    k = key.encode("utf-8")
+    if len(p) != len(k):
+        raise ValueError("Key and message must have equal byte lengths.")
+    return bytes(a ^ b for a, b in zip(p, k))
 
-    output = ""
-    for ch in text:
-        if ch.isalpha():
-            base = ord('A') if ch.isupper() else ord('a')
-            x = ord(ch) - base
-            output += chr((a * x + b) % 26 + base)
-        else:
-            output += ch
-    return output
-
-def affine_decrypt(text, a, b):
-    inv_a = modular_inverse(a, 26)
-    if inv_a is None:
-        raise ValueError("a has no modular inverse modulo 26")
-
-    output = ""
-    for ch in text:
-        if ch.isalpha():
-            base = ord('A') if ch.isupper() else ord('a')
-            y = ord(ch) - base
-            output += chr((inv_a * (y - b)) % 26 + base)
-        else:
-            output += ch
-    return output
+def otp_decrypt(ciphertext, key):
+    k = key.encode("utf-8")
+    if len(ciphertext) != len(k):
+        raise ValueError("Key and ciphertext must have equal byte lengths.")
+    plaintext = bytes(a ^ b for a, b in zip(ciphertext, k))
+    return plaintext.decode("utf-8")
 
 message = "HELLO"
-a, b = 5, 8
-
-cipher = affine_encrypt(message, a, b)
-plain = affine_decrypt(cipher, a, b)
-
-print("Ciphertext:", cipher)
-print("Decrypted:", plain)
-15. Diffie–Hellman Key Exchange
-Diffie–Hellman allows two parties to establish a shared secret over a public channel.
-
-Public parameters:
-- A prime number \(p\)
-- A generator \(g\)
-Private values:
-- Alice chooses secret a.
-- Bob chooses secret b.
-Public values:
+key = "XMCKL"  # Demonstration key only; not a secure random OTP key.
+ciphertext = otp_encrypt(message, key)
+print("Ciphertext:", ciphertext.hex())
+print("Recovered:", otp_decrypt(ciphertext, key))
+10.2 Many-Time Pad
+If the same key is reused:
 \[
-A=g^a\bmod p
+C_1=P_1\oplus K,\qquad C_2=P_2\oplus K.
 \]
+Therefore,
 \[
-B=g^b\bmod p
+C_1\oplus C_2=P_1\oplus P_2.
 \]
-Shared secret:
-\[
-K=B^a\bmod p=A^b\bmod p
-\]
-Python Demonstration
-# Public parameters (small educational values)
-p = 23
-g = 5
+The key cancels out. This leaks a relationship between the plaintext messages and can enable statistical or known-plaintext attacks.
+def xor_bytes(a, b):
+    return bytes(x ^ y for x, y in zip(a, b))
 
-# Private keys
-alice_private = 6
-bob_private = 15
+p1 = b"attack at dawn"
+p2 = b"attack at dusk"
+reused_key = b"0123456789abcd"
 
-# Public keys
-alice_public = pow(g, alice_private, p)
-bob_public = pow(g, bob_private, p)
+c1 = xor_bytes(p1, reused_key)
+c2 = xor_bytes(p2, reused_key)
 
-# Shared secret
-alice_shared = pow(bob_public, alice_private, p)
-bob_shared = pow(alice_public, bob_private, p)
-
-print("Alice public key:", alice_public)
-print("Bob public key:", bob_public)
-print("Alice shared secret:", alice_shared)
-print("Bob shared secret:", bob_shared)
-print("Keys match:", alice_shared == bob_shared)
-Expected observation: Both parties calculate the same shared secret.
-
-Security note: These small numbers are only for learning. Real systems use carefully selected large parameters and authenticated key exchange to prevent man-in-the-middle attacks.
-16. RSA Public-Key Cryptography
-RSA is an asymmetric cryptographic algorithm. It uses a public key for encryption and a private key for decryption.
-16.1 Key Generation
-1. Select two distinct prime numbers \(p\) and \(q\).
-2. Calculate:
+print("Ciphertext XOR:", xor_bytes(c1, c2).hex())
+print("Plaintext XOR:", xor_bytes(p1, p2).hex())
+assert xor_bytes(c1, c2) == xor_bytes(p1, p2)
+11. RSA Cryptosystem
+RSA is an asymmetric cryptographic algorithm based on the mathematical difficulty of factoring a sufficiently large composite integer.
+11.1 Key Generation
+1. Select two distinct large primes \(p,q\).
+2. Calculate \(n=pq\).
+3. Calculate Euler's totient:
 \[
-n=pq
+\phi(n)=(p-1)(q-1).
 \]
-3. Calculate:
+4. Select \(e\) such that
 \[
-\phi(n)=(p-1)(q-1)
+1<e<\phi(n),\qquad \gcd(e,\phi(n))=1.
 \]
-4. Choose e such that:
+5. Calculate \(d\) such that
 \[
-1<e<\phi(n),\quad \gcd(e,\phi(n))=1
+ed\equiv1\pmod{\phi(n)}.
 \]
-5. Calculate d, the modular inverse of e modulo \(\phi(n)\):
+Public key: \((n,e)\)
+Private key: \((n,d)\)
+11.2 Encryption
 \[
-ed\equiv1\pmod{\phi(n)}
+C=M^e\bmod n.
 \]
-Public key: \((e,n)\)
-
-Private key: \((d,n)\)
-16.2 Encryption and Decryption
-Encryption:
+11.3 Decryption
 \[
-C=M^e\bmod n
+M=C^d\bmod n.
 \]
-Decryption:
-\[
-M=C^d\bmod n
-\]
-Python Implementation
-def rsa_key_generation(p, q):
-    if not is_prime(p) or not is_prime(q) or p == q:
-        raise ValueError("p and q must be distinct prime numbers")
-
+11.4 Educational RSA Implementation
+def rsa_key_generation(p, q, e):
+    if p == q:
+        raise ValueError("Choose distinct primes.")
     n = p * q
     phi = (p - 1) * (q - 1)
+    if gcd_euclidean(e, phi) != 1:
+        raise ValueError("e must be coprime to phi(n).")
+    d = mod_inverse(e, phi)
+    return (n, e), (n, d)
 
-    e = 2
-    while e < phi and gcd(e, phi) != 1:
-        e += 1
-
-    if e >= phi:
-        raise ValueError("Could not find a valid public exponent")
-
-    d = modular_inverse(e, phi)
-    return (e, n), (d, n)
-
-def rsa_encrypt(message, public_key):
-    e, n = public_key
+def rsa_encrypt_integer(message, public_key):
+    n, e = public_key
     if not 0 <= message < n:
-        raise ValueError("Message must be an integer between 0 and n-1")
-    return pow(message, e, n)
+        raise ValueError("Message integer must be in [0, n).")
+    return fast_mod_exp(message, e, n)
 
-def rsa_decrypt(ciphertext, private_key):
-    d, n = private_key
-    return pow(ciphertext, d, n)
+def rsa_decrypt_integer(ciphertext, private_key):
+    n, d = private_key
+    return fast_mod_exp(ciphertext, d, n)
 
-# Small values are used only for demonstration.
-p, q = 61, 53
-public_key, private_key = rsa_key_generation(p, q)
-
+public_key, private_key = rsa_key_generation(61, 53, 17)
 message = 65
-ciphertext = rsa_encrypt(message, public_key)
-decrypted_message = rsa_decrypt(ciphertext, private_key)
+ciphertext = rsa_encrypt_integer(message, public_key)
+recovered = rsa_decrypt_integer(ciphertext, private_key)
 
 print("Public key:", public_key)
 print("Private key:", private_key)
-print("Original message:", message)
-print("Encrypted message:", ciphertext)
-print("Decrypted message:", decrypted_message)
-Expected observation: The decrypted message should equal the original message, 65.
+print("Ciphertext:", ciphertext)
+print("Recovered message:", recovered)
+assert recovered == message
+Important: This is textbook RSA for learning. Real applications must use secure padding such as RSA-OAEP for encryption and a vetted cryptographic library. Do not use small primes or raw textbook RSA in production.
+12. RSA Weakness Demonstrations
+These experiments demonstrate why poor key generation and insecure RSA usage can expose private information. They are educational demonstrations using deliberately weak or compromised examples.
+12.1 Small-Prime Factorization
+If one factor of \(n=pq\) is very small, trial division can recover it.
+def factor_small_prime(n, limit=1_000_000):
+    if n % 2 == 0:
+        return 2, n // 2
+    candidate = 3
+    while candidate <= limit and candidate * candidate <= n:
+        if n % candidate == 0:
+            return candidate, n // candidate
+        candidate += 2
+    return None
 
-Important security limitation: This is textbook RSA for educational demonstration only. It is not safe for real communication. Production RSA requires secure padding such as RSA-OAEP, suitable key sizes, and vetted cryptographic libraries. Never use this small-number implementation to protect real data.
-17. Cryptographic Hashing (SHA-256)
-A cryptographic hash function maps input data to a fixed-length digest.
+print(factor_small_prime(101 * 1000000007))
+12.2 Fermat Factorization: Close Prime Factors
+If \(p\) and \(q\) are close, then \(n=pq\) can be expressed as a difference of squares:
+\[
+n=a^2-b^2=(a-b)(a+b).
+\]
+from math import isqrt
 
-SHA-256 produces a 256-bit digest. It is designed to be one-way: the original input should not be practically recoverable from the digest.
-import hashlib
+def fermat_factor(n, max_steps=100_000):
+    a = isqrt(n)
+    if a * a < n:
+        a += 1
 
-message = "Number Theory and Cryptography"
-digest = hashlib.sha256(message.encode("utf-8")).hexdigest()
+    for _ in range(max_steps):
+        b2 = a*a - n
+        b = isqrt(b2)
+        if b*b == b2:
+            p, q = a-b, a+b
+            if p*q == n:
+                return min(p, q), max(p, q)
+        a += 1
+    return None
 
-print("Message:", message)
-print("SHA-256:", digest)
-print("Digest length in hexadecimal characters:", len(digest))
-Important distinction: Hashing is not encryption. There is no decryption key to recover the original message. For password storage, use a password-hashing scheme such as Argon2id, scrypt, or bcrypt rather than plain SHA-256.
-Part C: Integrated Practical Work
-18. Mini Practical: RSA Message Demonstration
-This final cell combines text conversion and the educational RSA functions. Each character is converted to its Unicode code point and encrypted separately. The example uses small demonstration keys, so it is not secure and is not a real text-encryption system.
-public_key, private_key = rsa_key_generation(61, 53)
+print(fermat_factor(1009 * 1013))
+12.3 Common-Factor Attack
+If two RSA moduli share a prime factor, the GCD reveals that factor:
+\[
+p=\gcd(n_1,n_2).
+\]
+def common_factor_attack(n1, n2):
+    p = gcd_euclidean(n1, n2)
+    if p == 1 or p == n1 or p == n2:
+        return None
+    return p, n1 // p, n2 // p
 
-message = "HI"
-encrypted_values = [
-    rsa_encrypt(ord(char), public_key)
-    for char in message
-]
+n1 = 101 * 107
+n2 = 101 * 113
+print(common_factor_attack(n1, n2))
+12.4 Håstad's Broadcast Attack (Concept)
+When the same small message is sent using the same low public exponent to multiple recipients without secure randomized padding, CRT can combine ciphertexts. If the combined integer is the exact \(e\)-th power of the message, taking its integer root can recover the message.
 
-decrypted_text = "".join(
-    chr(rsa_decrypt(value, private_key))
-    for value in encrypted_values
-)
+For a two-recipient demonstration with \(e=2\):
+def integer_nth_root(value, n):
+    if value < 0 or n <= 0:
+        raise ValueError("Invalid input.")
+    if value < 2:
+        return value
+    low, high = 0, 1
+    while high ** n <= value:
+        high *= 2
+    while low + 1 < high:
+        mid = (low + high) // 2
+        if mid ** n <= value:
+            low = mid
+        else:
+            high = mid
+    return low
 
-print("Original text:", message)
-print("Encrypted integer list:", encrypted_values)
-print("Decrypted text:", decrypted_text)
-Observation: The decrypted text should match the original text. This demonstrates the mathematical relationship between RSA encryption and decryption, not a secure way to encrypt real messages.
-19. Results and Discussion
-The practical implementations demonstrate the relationship between number theory and cryptography.
-Experiment	Result / observation
-Divisibility	Modulo operation identifies whether one integer divides another.
-Prime checking	Trial division up to the square root identifies small prime numbers.
-Euclidean Algorithm	Repeated remainders calculate the GCD efficiently.
-Extended Euclidean Algorithm	Finds Bézout coefficients and supports modular inverse calculation.
-Modular arithmetic	Arithmetic can be performed using remainders.
-Modular inverse	An inverse exists exactly when the number and modulus are coprime.
-Fermat's theorem	The modular power identity holds under its prime and coprimality conditions.
-Euler's totient	Counts positive integers relatively prime to a given integer.
-CRT	Combines compatible congruences into one solution modulo the product.
-Caesar and Affine ciphers	Demonstrate substitution encryption and decryption.
-Diffie–Hellman	Two participants independently calculate the same shared secret.
-RSA	Public-key encryption and private-key decryption recover the original integer.
-SHA-256	Produces a fixed-length digest for an input message.
+def hastad_two_recipient_demo(m, n1, n2, e=2):
+    if e != 2:
+        raise NotImplementedError("This demonstration is for e=2.")
+    c1 = pow(m, e, n1)
+    c2 = pow(m, e, n2)
+    combined = chinese_remainder(n1, c1, n2, c2)
+    recovered = integer_nth_root(combined, e)
+    if recovered ** e != combined:
+        raise ValueError("Exact-root condition not satisfied.")
+    return c1, c2, combined, recovered
+
+print(hastad_two_recipient_demo(42, 101, 103))
+The demonstration requires the message power to be smaller than the product of the moduli and the moduli to be coprime. This is not a general attack against correctly padded modern RSA.
+12.5 Mapping to the Workshop RSA Assignment
+The original RSA notebook has seven programming tasks. The practice notebook includes corresponding helper functions:
+Original task	Function in the practice notebook
+Q1: RSA encryption	Encrypt
+Q2: RSA decryption	Decrypt
+Q3: Search a list of possible plaintexts	DecipherSimple
+Q4: Factor a modulus with a small prime factor	DecipherSmallPrime
+Q5: Factor a modulus with close prime factors	DecipherSmallDiff
+Q6: Recover two keys that share a prime factor	DecipherCommonDivisor
+Q7: Håstad broadcast attack for exponent 2	DecipherHastad
 
 
-19.1 Number Theory to Cryptography: Concept Map
-                 NUMBER THEORY
-                       |
-       +---------------+----------------+
-       |               |                |
-   Prime Numbers      GCD        Modular Arithmetic
-       |               |                |
-       |        Extended GCD       Modular Inverse
-       |               |                |
-       +---------------+----------------+
-                       |
-                  CRYPTOGRAPHY
-                       |
-       +---------------+----------------+
-       |               |                |
-      RSA        Diffie–Hellman   Classical Ciphers
-       |               |                |
-  Public/Private   Shared Secret    Encryption/
-      Keys           Exchange        Decryption
-20. Conclusion
-This assignment explored fundamental concepts of number theory and their applications in cryptography using Python. The Euclidean and Extended Euclidean Algorithms were implemented to calculate GCD and modular inverses. Modular arithmetic, Fermat's Little Theorem, Euler's totient function, Euler's theorem, and the Chinese Remainder Theorem were studied through practical examples.
+The functions use the number-theory helpers defined earlier in the notebook. RSA text encoding requires the encoded integer to be smaller than the modulus. The small-modulus illustration in the original Q3 is not suitable for uniquely encoding arbitrary strings; collisions are possible. Q4–Q7 are demonstrations of weak-key conditions, not instructions for attacking real systems.
+13. Diffie–Hellman Key Exchange
+Diffie–Hellman allows two parties to establish a shared secret over a public channel.
 
-The cryptography section demonstrated Caesar and Affine ciphers, Diffie–Hellman key exchange, RSA, and SHA-256 hashing. The experiments show that number theory provides the mathematical foundation for many cryptographic techniques. The assignment also highlights that educational implementations with small numbers are not suitable for real-world security.
-21. Learning Outcomes
-After completing this assignment, I can:
-- Explain basic number-theory concepts.
-- Implement GCD and Extended GCD in Python.
-- Perform modular arithmetic and calculate modular inverses.
-- Apply Fermat's Litt
+Public parameters: prime \(p\) and generator \(g\).
+- Alice selects private value \(a\) and publishes \(A=g^a\bmod p\).
+- Bob selects private value \(b\) and publishes \(B=g^b\bmod p\).
+- Alice computes \(K=B^a\bmod p\).
+- Bob computes \(K=A^b\bmod p\).
+Both obtain:
+\[
+K=g^{ab}\bmod p.
+\]
+def diffie_hellman_demo(p, g, a, b):
+    A = fast_mod_exp(g, a, p)
+    B = fast_mod_exp(g, b, p)
+    alice_key = fast_mod_exp(B, a, p)
+    bob_key = fast_mod_exp(A, b, p)
+    assert alice_key == bob_key
+    return A, B, alice_key
+
+print(diffie_hellman_demo(11, 7, 2, 4))
+Security note: Basic Diffie–Hellman does not authenticate the communicating parties and is vulnerable to man-in-the-middle attacks unless combined with authentication.
+14. Shor's Algorithm: Mathematical Idea
+Shor's algorithm is a quantum algorithm that can factor integers efficiently in the ideal fault-tolerant quantum-computing model.
+
+Its mathematical foundation includes period finding. For a chosen integer \(a\) coprime to \(N\), it seeks the smallest positive \(r\) such that
+\[
+a^r\equiv1\pmod N.
+\]
+When \(r\) is even and \(a^{r/2}\not\equiv-1\pmod N\), factors can be obtained from
+\[
+\gcd(a^{r/2}-1,N),\qquad
+\gcd(a^{r/2}+1,N).
+\]
+For \(N=35\), choose \(a=8\). Its period is \(r=4\):
+\[
+8^2=64,\quad 64\bmod35=29.
+\]
+Then
+\[
+\gcd(29-1,35)=7,\qquad
+\gcd(29+1,35)=5.
+\]
+from math import gcd
+
+N = 35
+a = 8
+r = 4
+
+factor1 = gcd(a**(r//2) - 1, N)
+factor2 = gcd(a**(r//2) + 1, N)
+
+print("Factors:", factor1, factor2)
+This is a classical illustration of the number-theoretic post-processing, not a quantum implementation of Shor's algorithm.
+15. Experiments and Results
+Run the notebook and record the actual outputs. Suggested experiments:
+Experiment	Input	Expected verification
+GCD	48, 18	6
+Extended GCD	27, 15	\(27x+15y=3\)
+LCM	9, 3	9
+Diophantine	15, 25, 5	\(15x+25y=5\)
+Modular inverse	7 mod 26	15
+Fast modular exponentiation	\(4^5\bmod3\)	1
+CRT	(13,7), (6,5)	59
+RSA	p=61, q=53, e=17, M=65	Decrypted message = 65
+Diffie–Hellman	p=11, g=7, a=2, b=4	Shared key = 9
+Fermat factorization	1009 × 1013	1009 and 1013
+
+
+Result Discussion
+The experiments demonstrate that number-theoretic algorithms can be implemented efficiently using Python. The Extended Euclidean Algorithm provides modular inverses, fast modular exponentiation reduces the number of multiplications, and CRT combines congruences. RSA and Diffie–Hellman show how these mathematical properties support public-key cryptography. The attack demonstrations highlight the importance of secure key generation, correct padding and non-reuse of secret material.
+16. Conclusion
+This practical study connected fundamental number theory with cryptographic applications. The implemented algorithms covered GCD, LCM, Bézout coefficients, Diophantine equations, modular inverses, fast modular exponentiation and CRT. The cryptography experiments demonstrated OTP, the danger of key reuse, RSA, Diffie–Hellman and selected RSA weaknesses. Overall, the work shows that a strong understanding of number theory is essential for understanding modern cryptographic systems.
+17. References
+1. Number Theory and Cryptography Workshop — Maths and Physics Club, IIT Bombay
+2. Workshop README and setup instructions
+3. Day 1 Number Theory Assignment Notebook
+4. Day 2 Number Theory Assignment
+5. Cryptography Handout and Notebooks
+6. RSA Assignment Notebook
+7. Many-Time Pad Notebook
+8. Diffie–Hellman and RSA Demo Notebook
+9. Python Documentation
+10. Jupyter Documentation
